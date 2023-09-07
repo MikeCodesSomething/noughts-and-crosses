@@ -60,6 +60,7 @@ const gameBoard = (() => {
 
 const gameController = (() => {
     let players = [];
+    let gameLog = [];
 
     const createPlayer = (name) => {
         let piece = 'X';
@@ -83,10 +84,10 @@ const gameController = (() => {
             activePlayer === players[0] ? activePlayer = players[1] : activePlayer = players[0];
             }
             //if game is over log the result
-            if(gameOverStatus === 'draw') console.log("Game over, it's a draw!")
-            else if(gameOverStatus !== false) console.log(`Game over! ${gameOverStatus}'s win`);
+            if(gameOverStatus === 'draw') updateGameLog("Game over, it's a draw!")
+            else if(gameOverStatus !== false) updateGameLog(`Game over! ${gameOverStatus}'s win`);
         }
-        else console.log("Can't choose that cell, try again")
+        else updateGameLog("Can't choose that cell, try again")
     }
     
     const gameOverCheck = () => {
@@ -102,7 +103,7 @@ const gameController = (() => {
             for(j = 0; j < numberOfColumns; j++) {
                 row.push(board[rowFirstIndex + j].state)
             }
-            console.log(row);
+
             let rowAllSameState = row.every((state) => state === row[0])
             if(row[0]!= null && rowAllSameState) return row[0];
             }
@@ -152,15 +153,21 @@ const gameController = (() => {
         return false;
     }
 
+    const updateGameLog = (logEntry) => {
+        gameLog.unshift(logEntry);
+        console.log(gameLog);
+    }
+
     //Initialise
     
     players.push(createPlayer('PLAYER 1'));
     players.push(createPlayer('PLAYER 2'));
     let activePlayer = players[0];
-    console.log(players);
+    updateGameLog(players[0].name);
+    updateGameLog(players[1].name);
 
 
-    return {placePiece, updatePlayerName};
+    return {placePiece, updatePlayerName, gameLog};
 
 
 
@@ -189,8 +196,8 @@ const displayController = (() => {
         for (let i = 0; i < numberOfRows; i++) {
             let boardRow = document.createElement('div');
             boardRow.classList.add('board-row')
-            let cellHeight = gameBoardContainer.offsetHeight / numberOfRows;
-            let cellWidth = gameBoardContainer.offsetHeight / numberOfColumns;
+            let cellHeight = gameBoardContainer.offsetHeight / numberOfRows -2;
+            let cellWidth = gameBoardContainer.offsetHeight / numberOfColumns -2;
             for (let j = 0; j < numberOfColumns; j++) {
                 let cellIndex = i*numberOfColumns + j
                 let cellDiv = createCell(board[cellIndex]); 
@@ -200,13 +207,18 @@ const displayController = (() => {
                 cellDiv.style.lineHeight = `${cellHeight}px`;
 
                 //Trick to size the O's and X's to be as big as will fit
-                cellDiv.style.fontSize = `${Math.min(cellHeight, cellWidth)}px`;
+                cellDiv.style.fontSize = `${Math.min(cellHeight, cellWidth)-10}px`;
                 
                 boardRow.appendChild(cellDiv);
             }
            gameBoardContainer.appendChild(boardRow);
         }
-    }         
+        renderGameLog();
+    } 
+    
+    const renderGameLog = () => {
+        gameLogDisplay.textContent = gameController.gameLog;
+    }
 
     const createCell = (cell) => {
         let cellDiv = document.createElement('div');
@@ -214,7 +226,6 @@ const displayController = (() => {
         cellDiv.setAttribute('data-row',cell.row);
         cellDiv.setAttribute('data-column',cell.column);
         return cellDiv
-        // console.log(`${cell.row}-${cell.column}`)
     }
 
     const playerClick = (event) => {
@@ -236,7 +247,11 @@ const displayController = (() => {
     //Initialise
     //Cache DOM elements:
     const gameBoardContainer = document.getElementById("grid-container");
-    gameBoardContainer.addEventListener('click', playerClick)
+    gameBoardContainer.addEventListener('click', playerClick);
+    const player1NameInput = document.getElementById("player-1");
+    const player2NameInput = document.getElementById("player-2");
+    const gameLogDisplay = document.getElementById("log-container");
+
     //Render the board
     render();
 
