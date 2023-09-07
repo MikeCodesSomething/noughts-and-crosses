@@ -181,16 +181,27 @@ const displayController = (() => {
     const gameBoardContainer = document.getElementById("grid-container");
     //Render the game board
     const render = () => {
-        board = gameBoard.getBoard();
-        board.forEach(cell => displayCell(cell));
-        console.log('ran render')
+        let board = gameBoard.getBoard();
+        let numberOfRows = gameBoard.getNumberOfRows();
+        let numberOfColumns = gameBoard.getNumberOfColumns();
+        
+        for (let i = 0; i < numberOfRows; i++) {
+            let boardRow = document.createElement('div');
+            boardRow.classList.add('board-row')
+            for (let j = 0; j < numberOfColumns; j++) {
+                let cellIndex = i*numberOfColumns + j
+                let cellDiv = createCell(board[cellIndex]);             
+                boardRow.appendChild(cellDiv);
+            }
+           gameBoardContainer.appendChild(boardRow);
+        }
     }         
 
-    const displayCell = (cell) => {
+    const createCell = (cell) => {
         let cellDiv = document.createElement('div');
         cellDiv.classList.add('game-board-cell');
         cellDiv.setAttribute('id',`${cell.row}-${cell.column}`)
-        gameBoardContainer.appendChild(cellDiv);
+        return cellDiv
         // console.log(`${cell.row}-${cell.column}`)
     }
 
