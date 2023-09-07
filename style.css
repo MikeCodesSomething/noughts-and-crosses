@@ -22,9 +22,10 @@
 
 .game-board-cell {
     flex: 1;
-    height: 100%;
     background-color: white;
     border-right: 2px solid black;
+    text-align: center;
+
 }
 
 .game-board-cell:last-child {

@@ -96,7 +96,7 @@ const gameController = (() => {
 
         //Check if there is a full row of the same state (not blank)
         for(i = 0; i < numberOfRows; i++) {
-            let rowFirstIndex = numberOfRows * i;
+            let rowFirstIndex = numberOfColumns * i;
             let row = [];
             // Get the full row
             for(j = 0; j < numberOfColumns; j++) {
@@ -133,8 +133,6 @@ const gameController = (() => {
             let downDiagAllSameState = downDiagonal.every((state) => state === downDiagonal[0]);
             if(downDiagonal[0] != null && downDiagAllSameState) return downDiagonal[0];
 
-
-
             //(0,2) (1,1) (2,0)... starting at end of first row, add (number of columns -1)
             let upDiagonal = [];
             for(i = numberOfColumns-1;
@@ -162,7 +160,7 @@ const gameController = (() => {
     console.log(players);
 
 
-    return {placePiece, updatePlayerName}
+    return {placePiece, updatePlayerName};
 
 
 
@@ -177,20 +175,33 @@ const gameController = (() => {
 
 const displayController = (() => {
 
-    //Cache DOM elements:
-    const gameBoardContainer = document.getElementById("grid-container");
+    
     //Render the game board
     const render = () => {
         let board = gameBoard.getBoard();
         let numberOfRows = gameBoard.getNumberOfRows();
         let numberOfColumns = gameBoard.getNumberOfColumns();
         
+        //Clear the existing board if it exists
+        gameBoardContainer.replaceChildren();
+
+        //Create as many cells as there are rows*columns, stored in rows
         for (let i = 0; i < numberOfRows; i++) {
             let boardRow = document.createElement('div');
             boardRow.classList.add('board-row')
+            let cellHeight = gameBoardContainer.offsetHeight / numberOfRows;
+            let cellWidth = gameBoardContainer.offsetHeight / numberOfColumns;
             for (let j = 0; j < numberOfColumns; j++) {
                 let cellIndex = i*numberOfColumns + j
-                let cellDiv = createCell(board[cellIndex]);             
+                let cellDiv = createCell(board[cellIndex]); 
+                cellDiv.textContent = (board[cellIndex].state);
+
+                //Trick to set line-height dynamically to center text in div
+                cellDiv.style.lineHeight = `${cellHeight}px`;
+
+                //Trick to size the O's and X's to be as big as will fit
+                cellDiv.style.fontSize = `${Math.min(cellHeight, cellWidth)}px`;
+                
                 boardRow.appendChild(cellDiv);
             }
            gameBoardContainer.appendChild(boardRow);
@@ -200,12 +211,35 @@ const displayController = (() => {
     const createCell = (cell) => {
         let cellDiv = document.createElement('div');
         cellDiv.classList.add('game-board-cell');
-        cellDiv.setAttribute('id',`${cell.row}-${cell.column}`)
+        cellDiv.setAttribute('data-row',cell.row);
+        cellDiv.setAttribute('data-column',cell.column);
         return cellDiv
         // console.log(`${cell.row}-${cell.column}`)
     }
 
+    const playerClick = (event) => {
+        //Get the coordinates of the cell clicked
+        let row = event.target.dataset.row;
+        let column = event.target.dataset.column;
+        
+        //Convert these string values to integers for calling the API
+        row = parseInt(row);
+        column = parseInt(column);
+        
+        //Call the placePiece api for that cell
+        gameController.placePiece(row, column)
+        
+        //Re-render the board
+        render();
+    }
+
     //Initialise
+    //Cache DOM elements:
+    const gameBoardContainer = document.getElementById("grid-container");
+    gameBoardContainer.addEventListener('click', playerClick)
+    //Render the board
     render();
+
+    return {render};
 
 })();
