@@ -5,8 +5,8 @@
 //Game > Turn?
 
 const gameBoard = (() => {
-    const numberOfRows = 3;
-    const numberOfColumns = 3;
+    const numberOfRows = 4;
+    const numberOfColumns = 4;
 
     const generateBoard = (rows,cols) => {
         const board = [];
@@ -74,9 +74,9 @@ const gameController = (() => {
     }
 
     const placePiece = (row, column) => {
-        //update gameboard if an empty space has been picked
+        //update gameboard if empty space picked and it's not game over
         let cell = gameBoard.getBoardCell(row, column);
-        if(cell.state === null) {
+        if(cell.state === null && gameOverCheck() === false) {
             gameBoard.updateBoardCell(cell, activePlayer.piece)
             //switch players turn if game isn't over
             gameOverStatus = gameOverCheck()
@@ -87,7 +87,7 @@ const gameController = (() => {
             if(gameOverStatus === 'draw') updateGameLog("Game over, it's a draw!")
             else if(gameOverStatus !== false) updateGameLog(`Game over! ${gameOverStatus}'s win`);
         }
-        else updateGameLog("Can't choose that cell, try again")
+        // else updateGameLog("Can't choose that cell, try again")
     }
     
     const gameOverCheck = () => {
@@ -153,21 +153,26 @@ const gameController = (() => {
         return false;
     }
 
+
     const updateGameLog = (logEntry) => {
         gameLog.unshift(logEntry);
         console.log(gameLog);
     }
 
+    const getActivePlayer = () => activePlayer;
+
     //Initialise
-    
+    const startGame = () => {
+    players = [];
     players.push(createPlayer('PLAYER 1'));
     players.push(createPlayer('PLAYER 2'));
-    let activePlayer = players[0];
-    updateGameLog(players[0].name);
-    updateGameLog(players[1].name);
+    activePlayer = players[0];
+    }
+    let activePlayer;
+    startGame();
 
 
-    return {placePiece, updatePlayerName, gameLog};
+    return {startGame, placePiece, updatePlayerName, gameLog, getActivePlayer};
 
 
 
@@ -214,10 +219,23 @@ const displayController = (() => {
            gameBoardContainer.appendChild(boardRow);
         }
         renderGameLog();
+        renderTurnDisplay(); 
     } 
     
     const renderGameLog = () => {
-        gameLogDisplay.textContent = gameController.gameLog;
+        gameLogDisplay.replaceChildren();
+        for(logEntry of gameController.gameLog) {
+            logEntryDiv = document.createElement('div');
+            logEntryDiv.classList.add('log-entry');
+            logEntryDiv.textContent = logEntry;
+            gameLogDisplay.appendChild(logEntryDiv);
+        }
+    }
+
+    const renderTurnDisplay = () => {
+        let activePlayerName = gameController.getActivePlayer().name;
+        let activePlayerPiece = gameController.getActivePlayer().piece;
+        turnDisplay.textContent = `${activePlayerName}'s turn - placing ${activePlayerPiece}`;
     }
 
     const createCell = (cell) => {
@@ -251,6 +269,7 @@ const displayController = (() => {
     const player1NameInput = document.getElementById("player-1");
     const player2NameInput = document.getElementById("player-2");
     const gameLogDisplay = document.getElementById("log-container");
+    const turnDisplay = document.getElementById("turn-display");
 
     //Render the board
     render();
