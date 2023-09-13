@@ -9,7 +9,6 @@ const gameBoard = (() => {
     const numberOfColumns = 4;
 
     const generateBoard = (rows,cols) => {
-        const board = [];
         for(let i = 0; i < rows; i++) {
             for(let j =0; j < cols; j++) {
                 board.push({row: i, column: j, state:null})
@@ -37,6 +36,10 @@ const gameBoard = (() => {
 
     const getBoard = () => board;
 
+    const resetBoard = () => {
+        if(board.length > 0) board = [];
+    }
+
     const printBoard = () => {
         let boardString = ''
         board.forEach((cell, index) => {
@@ -50,12 +53,13 @@ const gameBoard = (() => {
         };
     
     //Initialise
-    let board = generateBoard(numberOfRows,numberOfColumns);
+    let board = []
+    board = generateBoard(numberOfRows,numberOfColumns);
     printBoard();
 
 
     //return public methods
-    return {getNumberOfRows, getNumberOfColumns, getBoard, getBoardCell, printBoard, updateBoardCell};
+    return {generateBoard, getNumberOfRows, getNumberOfColumns, getBoard, resetBoard, getBoardCell, printBoard, updateBoardCell};
 })();
 
 const gameController = (() => {
@@ -163,6 +167,8 @@ const gameController = (() => {
 
     //Initialise
     const startGame = () => {
+    gameBoard.resetBoard();
+    gameBoard.generateBoard(gameBoard.getNumberOfRows(),gameBoard.getNumberOfColumns());
     players = [];
     players.push(createPlayer('PLAYER 1'));
     players.push(createPlayer('PLAYER 2'));
@@ -262,6 +268,11 @@ const displayController = (() => {
         render();
     }
 
+    const restartButtonClick = () => {
+        gameController.startGame();
+        render();
+    }
+
     //Initialise
     //Cache DOM elements:
     const gameBoardContainer = document.getElementById("grid-container");
@@ -270,6 +281,8 @@ const displayController = (() => {
     const player2NameInput = document.getElementById("player-2");
     const gameLogDisplay = document.getElementById("log-container");
     const turnDisplay = document.getElementById("turn-display");
+    const restartButton = document.getElementById("restart-button");
+    restartButton.addEventListener('click', restartButtonClick);
 
     //Render the board
     render();
