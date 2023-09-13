@@ -5,8 +5,8 @@
 //Game > Turn?
 
 const gameBoard = (() => {
-    const numberOfRows = 4;
-    const numberOfColumns = 4;
+    const numberOfRows = 3;
+    const numberOfColumns = 3;
 
     const generateBoard = (rows,cols) => {
         for(let i = 0; i < rows; i++) {
@@ -89,7 +89,7 @@ const gameController = (() => {
             }
             //if game is over log the result
             if(gameOverStatus === 'draw') updateGameLog("Game over, it's a draw!")
-            else if(gameOverStatus !== false) updateGameLog(`Game over! ${gameOverStatus}'s win`);
+            else if(gameOverStatus !== false) updateGameLog(`Game over! ${gameOverStatus} wins`);
         }
         // else updateGameLog("Can't choose that cell, try again")
     }
@@ -109,7 +109,7 @@ const gameController = (() => {
             }
 
             let rowAllSameState = row.every((state) => state === row[0])
-            if(row[0]!= null && rowAllSameState) return row[0];
+            if(row[0]!= null && rowAllSameState) return activePlayer.name;
             }
 
         //Check if there is a full column of the same state (not blank)
@@ -121,7 +121,7 @@ const gameController = (() => {
                 column.push(board[columnFirstIndex + j * numberOfColumns].state)
             }
             let colAllSameState = column.every((state) => state === column[0]);
-            if(column[0] != null && colAllSameState) return column[0];
+            if(column[0] != null && colAllSameState) return activePlayer.name;
             }
         
         //We only need to check diagonals if cols = rows
@@ -136,7 +136,7 @@ const gameController = (() => {
                     downDiagonal.push(board[i].state);
                 } 
             let downDiagAllSameState = downDiagonal.every((state) => state === downDiagonal[0]);
-            if(downDiagonal[0] != null && downDiagAllSameState) return downDiagonal[0];
+            if(downDiagonal[0] != null && downDiagAllSameState) return activePlayer.name;
 
             //(0,2) (1,1) (2,0)... starting at end of first row, add (number of columns -1)
             let upDiagonal = [];
@@ -146,7 +146,7 @@ const gameController = (() => {
                     upDiagonal.push(board[i].state);
                 } 
             let upDiagAllSameState = upDiagonal.every((state) => state === upDiagonal[0]);
-            if(upDiagonal[0] != null && upDiagAllSameState) return upDiagonal[0];
+            if(upDiagonal[0] != null && upDiagAllSameState) return activePlayer.name;
         }
         
         //If no one has won, check to see if all spaces have been filled.
@@ -159,11 +159,17 @@ const gameController = (() => {
 
 
     const updateGameLog = (logEntry) => {
-        gameLog.unshift(logEntry);
-        console.log(gameLog);
+        gameController.gameLog.unshift(logEntry);
     }
 
-    const getActivePlayer = () => activePlayer;
+    const resetGameLog = () => {
+       gameController.gameLog = [];
+    }
+
+    const getActivePlayer = () => {
+        console.log(players);
+        return activePlayer;    
+    }
 
     //Initialise
     const startGame = () => {
@@ -178,7 +184,7 @@ const gameController = (() => {
     startGame();
 
 
-    return {startGame, placePiece, updatePlayerName, gameLog, getActivePlayer};
+    return {startGame, placePiece, updatePlayerName, gameLog, resetGameLog, getActivePlayer};
 
 
 
@@ -252,6 +258,13 @@ const displayController = (() => {
         return cellDiv
     }
 
+    const playerNameChange = (event) => {
+        let newName = event.target.value;
+        if(event.target.id === 'player-1-name') gameController.updatePlayerName(0, newName);
+        if(event.target.id === 'player-2-name') gameController.updatePlayerName(1, newName);
+        render();
+    }
+
     const playerClick = (event) => {
         //Get the coordinates of the cell clicked
         let row = event.target.dataset.row;
@@ -270,6 +283,8 @@ const displayController = (() => {
 
     const restartButtonClick = () => {
         gameController.startGame();
+        gameController.resetGameLog();
+        playerNameFields.reset();
         render();
     }
 
@@ -277,10 +292,16 @@ const displayController = (() => {
     //Cache DOM elements:
     const gameBoardContainer = document.getElementById("grid-container");
     gameBoardContainer.addEventListener('click', playerClick);
-    const player1NameInput = document.getElementById("player-1");
-    const player2NameInput = document.getElementById("player-2");
+
+    const playerNameFields = document.getElementById("player-name-form");
+    const player1NameInput = document.getElementById("player-1-name");
+    player1NameInput.addEventListener('input', playerNameChange);
+    const player2NameInput = document.getElementById("player-2-name");
+    player2NameInput.addEventListener('input', playerNameChange)
+
     const gameLogDisplay = document.getElementById("log-container");
     const turnDisplay = document.getElementById("turn-display");
+
     const restartButton = document.getElementById("restart-button");
     restartButton.addEventListener('click', restartButtonClick);
 

@@ -7,6 +7,7 @@
     flex-direction: column;
     width: 300px;
     height: 300px;
+    margin: 1rem;
 }
 
 .board-row {
@@ -30,4 +31,18 @@
 
 .game-board-cell:last-child {
     border-right: none
+}
+
+.game-board-cell:hover {
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);;
+    background-color: rgb(211, 211, 211);
+}
+
+#player-name-form{
+    margin: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
 }
